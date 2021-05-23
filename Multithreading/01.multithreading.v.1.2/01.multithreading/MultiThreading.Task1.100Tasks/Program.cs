@@ -28,20 +28,16 @@ namespace MultiThreading.Task1._100Tasks
 
         static void HundredTasks()
         {
-            var taskArray = new Task[TaskAmount];
-
             for (int i = 0; i < TaskAmount; i++)
             {
                 var taskNumber = i;
-                taskArray[taskNumber] = new Task(() =>
+                Task.Factory.StartNew(() =>
                 {
                     for (int j = 0; j < MaxIterationsCount; j++)
                     {
                         Output(taskNumber, j);
                     }
                 });
-
-                taskArray[taskNumber].Start();
             }
         }
 

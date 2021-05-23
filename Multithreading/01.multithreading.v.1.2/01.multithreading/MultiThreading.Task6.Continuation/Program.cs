@@ -74,7 +74,7 @@ namespace MultiThreading.Task6.Continuation
                 cancellationToken.ThrowIfCancellationRequested();
             }, cancellationToken);
 
-            initialTask.ContinueWith(task => ExecuteOnCancelResult(), new CancellationToken(), TaskContinuationOptions.OnlyOnCanceled, scheduler);
+            initialTask.ContinueWith(task => ExecuteOnCancelResult(), new CancellationToken(), TaskContinuationOptions.OnlyOnCanceled | TaskContinuationOptions.LongRunning, scheduler);
 
             cancelTokenSource.Cancel();
 

@@ -16,7 +16,7 @@ namespace MultiThreading.Task5.Threads.SharedCollection
     {
         private static List<int> numbers = new List<int>();
 
-        private static object locker = new object();
+        private static ManualResetEvent eventObj = new ManualResetEvent(false);
 
         static void Main(string[] args)
         {
@@ -28,9 +28,10 @@ namespace MultiThreading.Task5.Threads.SharedCollection
             for (int i = 0; i < 10; i++)
             {
                 var firstTask = new Task(AddElements);
-                var secondTask = firstTask.ContinueWith(task => PrintElements());
+                var secondTask = new Task(PrintElements);
                
                 firstTask.Start();
+                secondTask.Start();
                 secondTask.Wait();
             }
 
@@ -39,23 +40,20 @@ namespace MultiThreading.Task5.Threads.SharedCollection
 
         private static void AddElements()
         {
-            lock (locker)
-            {
-                numbers.Add(numbers.Count + 1);
-            }
+            numbers.Add(numbers.Count + 1);
+            eventObj.Set();
         }
 
         private static void PrintElements()
         {
-            lock (locker)
+            eventObj.WaitOne();
+            foreach (var item in numbers)
             {
-                foreach (var item in numbers)
-                {
-                    Console.Write(item + " ");
-                }
-
-                Console.WriteLine();
+                Console.Write(item + " ");
             }
+            
+            Console.WriteLine();
+            eventObj.Reset();
         }
     }
 }
