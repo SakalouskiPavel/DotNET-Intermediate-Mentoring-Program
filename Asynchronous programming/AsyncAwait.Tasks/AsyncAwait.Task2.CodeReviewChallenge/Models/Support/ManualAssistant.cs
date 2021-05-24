@@ -19,6 +19,7 @@ namespace AsyncAwait.Task2.CodeReviewChallenge.Models.Support
         {
             try
             {
+                //todo: use async await instead of using thread.sleep
                 Task t = _supportService.RegisterSupportRequestAsync(requestInfo);
                 Console.WriteLine(t.Status); // this is for debugging purposes
                 Thread.Sleep(5000); // this is just to be sure that the request is registered
@@ -27,6 +28,7 @@ namespace AsyncAwait.Task2.CodeReviewChallenge.Models.Support
             }
             catch (HttpRequestException ex)
             {
+                // todo: not use async await inside catch block
                 return await Task.Run(async () => await Task.FromResult($"Failed to register assistance request. Please try later. {ex.Message}"));
             }
         }

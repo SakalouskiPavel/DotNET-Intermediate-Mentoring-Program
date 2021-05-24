@@ -27,9 +27,11 @@ namespace AsyncAwait.Task2.CodeReviewChallenge.Middleware
                 () => _statisticService.RegisterVisitAsync(path)
                 .ConfigureAwait(false)
                 .GetAwaiter().OnCompleted(UpdateHeaders));
+            // todo: use debug #if DEBUG statementr
             Console.WriteLine(staticRegTask.Status); // just for debugging purposes
-            
-            void UpdateHeaders()
+
+            // todo: don't use void method fro method which should be executed synchronously 
+            void UpdateHeaders() 
             {
                 context.Response.Headers.Add(
                     CustomHttpHeaders.TotalPageVisits,
