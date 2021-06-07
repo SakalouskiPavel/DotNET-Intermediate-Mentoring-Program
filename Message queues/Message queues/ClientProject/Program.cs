@@ -6,20 +6,23 @@ using System.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 
 namespace ClientProject
 {
     class Program
     {
-        const string MessageQueueName = @".\Private$\MySimpleLocalQueue";
+        private const string MessageQueueName = @".\Private$\MySimpleLocalQueue";
 
-        const string ListeningFolderName = @"D:\ListeningFolder";
+        private const string ListeningFolderName = @"D:\ListeningFolder";
+
+        private const int BytesInMegabyte = 1024 * 1024;
+
+        private const int Limit = 1;
 
 
         static void Main(string[] args)
         {
-            var sdf = new MessageQueue();
-
             var sentFiles = new List<string>();
 
             if (!Directory.Exists(ListeningFolderName))
@@ -41,7 +44,6 @@ namespace ClientProject
                 }
 
                 Thread.Sleep(2000);
-
             }
            
         }
@@ -50,14 +52,43 @@ namespace ClientProject
         {
             using (var client = new MessageQueue(MessageQueueName))
             {
-                var message = new Message();
-
                 using (var fs = new FileStream(path, FileMode.Open))
                 {
-                    message.BodyStream = fs;
-                    message.Label = Path.GetFileName(path);
-                    message.Priority = MessagePriority.Normal;
-                    client.Send(message);
+                    var buffer = new byte[(int)fs.Length];
+                    fs.Read(buffer, 0, buffer.Length);
+                    
+                    var size = Limit * BytesInMegabyte;
+
+                    int from = 0;
+
+                    int position = 1;
+
+                    int count = Convert.ToInt32(Math.Ceiling((double)fs.Length / (double)size));
+
+                    Guid fileId = Guid.NewGuid();
+
+                    while (from < buffer.Length)
+                    {
+                        var message = new Message();
+                        message.Label = Path.GetFileName(path);
+
+                        var part = new FilePart()
+                        {
+                            Id = fileId,
+                            Buffer = buffer.Skip(from).Take(size).ToArray(),
+                            FileName = Path.GetFileName(path),
+                            PartPosition = position,
+                            PartsCount = count,
+                            FileSize = buffer.Length
+                        };
+
+                        message.Body = part;
+
+                        from += size;
+                        position++;
+                      
+                        client.Send(message);
+                    }
                 }
                 
             }
