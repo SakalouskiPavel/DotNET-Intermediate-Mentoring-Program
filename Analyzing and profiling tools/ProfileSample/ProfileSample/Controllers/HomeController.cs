@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using ProfileSample.DAL;
@@ -15,27 +16,16 @@ namespace ProfileSample.Controllers
         {
             var context = new ProfileSampleEntities();
 
-            var sources = context.ImgSources.Take(20).Select(x => x.Id);
-            
-            var model = new List<ImageModel>();
-
-            foreach (var id in sources)
+            var sources = context.ImgSources.Take(20).Select(x => new ImageModel()
             {
-                var item = context.ImgSources.Find(id);
+                Name = x.Name,
+                Data = x.Data
+            }).ToList();
 
-                var obj = new ImageModel()
-                {
-                    Name = item.Name,
-                    Data = item.Data
-                };
-
-                model.Add(obj);
-            } 
-
-            return View(model);
+            return View(sources);
         }
 
-        public ActionResult Convert()
+        public async Task<ActionResult> Convert()
         {
             var files = Directory.GetFiles(Server.MapPath("~/Content/Img"), "*.jpg");
 
@@ -56,9 +46,11 @@ namespace ProfileSample.Controllers
                         };
 
                         context.ImgSources.Add(entity);
-                        context.SaveChanges();
+                        
                     }
-                } 
+                }
+
+                await context.SaveChangesAsync();
             }
 
             return RedirectToAction("Index");
