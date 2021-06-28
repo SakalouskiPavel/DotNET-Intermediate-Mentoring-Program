@@ -1,7 +1,13 @@
-﻿namespace ExpressionTrees.Task2.ExpressionMapping.Tests.Models
+﻿using System.Text;
+
+namespace ExpressionTrees.Task2.ExpressionMapping.Tests.Models
 {
     internal class Foo
     {
-        // add here some properties
+        public string ProstoString { get; set; }
+        
+        public int Count;
+
+        public StringBuilder Biulder { get; set; }
     }
 }
